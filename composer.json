@@ -1,0 +1,13 @@
+{
+    "name": "egorleb/comments",
+    "description": "comments implementation for hotels.ru",
+    "autoload": {
+        "psr-4": {
+            "comments\\": "src/"
+        },
+        "files" : [
+            "config.php"
+        ]
+    },
+    "require": {}
+}
