@@ -2,6 +2,7 @@
 namespace comments;
 
 use comments\view\ViewInterface;
+use comments\database\CommentsDbInterface;
 
 class CommentsController
 {

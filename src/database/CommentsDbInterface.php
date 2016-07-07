@@ -1,5 +1,5 @@
 <?php
-namespace comments;
+namespace comments\database;
 
 interface CommentsDbInterface
 {

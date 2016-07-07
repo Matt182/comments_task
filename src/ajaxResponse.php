@@ -4,6 +4,7 @@ namespace comments;
 require_once '../vendor/autoload.php';
 
 use comments\view\View;
+use comments\database\DbActions;
 
 $db = new DbActions();
 $view = new View();
