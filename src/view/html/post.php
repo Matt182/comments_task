@@ -22,8 +22,8 @@ use function comments\printChildren;
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="button" onclick="postComment(<?= $child->getId() ?>)">Отправить</button>
                             </span>
-                        </div><!-- /input-group -->
-                    </form><!-- /.col-lg-6 -->
+                        </div>
+                    </form>
                 </div>
             <?php endif; ?>
             <div id="children<?= $child->getId() ?>">

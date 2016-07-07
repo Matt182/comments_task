@@ -36,9 +36,9 @@ function printChildren(array $children, $n)
                                 <span class="input-group-btn">
                                     <button class="btn btn-default" type="button" onclick="postComment(0)">Оставить комментарий</button>
                                 </span>
-                            </div><!-- /input-group -->
+                            </div>
                             </form>
-                        </div><!-- /.col-lg-6 -->
+                        </div>
 
                 </div>
 
@@ -52,6 +52,7 @@ function printChildren(array $children, $n)
 
         <!-- Latest compiled and minified JavaScript -->
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
         <script type="text/javascript" src="src/view/js/ajaxActions.js"></script>
     </body>
 </html>
