@@ -5,7 +5,6 @@ use function comments\printChildren;
 <div class='row col-sm-offset-1' id="comment<?= $child->getId() ?>">
     <div class='panel panel-default'>
         <div class='panel-heading'>
-            <span><?= $child->getId() ?></span>
             <span><?= $child->getDate() ?></span>
             <button type="button" onclick="deleteComment(<?= $child->getId() ?>)"><span class="glyphicon glyphicon-remove"></span></button>
         </div>

@@ -20,6 +20,9 @@ class DbActions implements CommentsDbInterface
         }
     }
 
+    /**
+     * @param int $id @return array
+     */
     public function get($id)
     {
         $stp = $this->connection->prepare('select * from comment where id =:id');
@@ -32,6 +35,9 @@ class DbActions implements CommentsDbInterface
         return $row;
     }
 
+    /**
+     * @param int $parentId @return array
+     */
     public function getByParent($parentId)
     {
         $stp = $this->connection->prepare('select * from comment where parent =:id order by created desc');
@@ -45,6 +51,9 @@ class DbActions implements CommentsDbInterface
         return $rows;
     }
 
+    /**
+     * @param string $text @param int $parentId @return int
+     */
     public function insert($text, $parentId)
     {
         try {
@@ -68,6 +77,9 @@ class DbActions implements CommentsDbInterface
         }
     }
 
+    /**
+     * @param int $id @return boolval
+     */
     public function delete($id)
     {
         $stp = $this->connection->prepare("delete from comment where id =:id");
@@ -76,6 +88,9 @@ class DbActions implements CommentsDbInterface
         return $stmt;
     }
 
+    /**
+     * @param int $id @return void
+     */
     public function setNoChild($id)
     {
         $stp = $this->connection->prepare("update comment set has_child='0' where id =:id");

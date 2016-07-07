@@ -32,6 +32,9 @@ if ($action == 'delete') {
                             'n' => ++$nesting]);
 }
 
+/**
+ * @param int $parentId @param DbActions $db @return void
+ */
 function deleteCascade($parentId, $db)
 {
     $children = $db->getByParent($parentId);

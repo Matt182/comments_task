@@ -16,6 +16,9 @@ class CommentsController
         $commentsTree = array();
     }
 
+    /**
+     * @param void @return void
+     */
     public function index()
     {
         $comments = $this->db->getByParent(0);
@@ -29,6 +32,9 @@ class CommentsController
         $this->view->render('comments', ['commentsTree' => $this->commentsTree ? $this->commentsTree : []]);
     }
 
+    /**
+     * @param int $parentId @return array
+     */
     public function getChildren($parentId)
     {
         $children = array();
