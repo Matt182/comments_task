@@ -38,7 +38,7 @@ class CommentsController
      */
     public function getChildren($parentId)
     {
-        $children = array();
+        $children = [];
         $comments = $this->db->getByParent($parentId);
         foreach ($comments as $comment) {
             $comment = new Comment($comment);

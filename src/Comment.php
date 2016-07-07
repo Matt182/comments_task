@@ -20,7 +20,7 @@ class Comment
         $this->date = date('j F o G:i', strtotime($commentRow['created']));
         $this->parent = $commentRow['parent'];
         $this->has_child = $commentRow['has_child'];
-        $this->children = array();
+        $this->children = [];
     }
 
     public function getId()
