@@ -1,0 +1,9 @@
+<?php
+//delete .example in file name and edit configs
+
+putenv ('driver=dbdriver');
+putenv ('dbname=yourdbname');
+putenv ('host=yourhost');
+putenv ('username=yourname');
+putenv ('pass=yourpass');
+?>
