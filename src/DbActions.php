@@ -22,36 +22,64 @@ class DbActions implements CommentsDbInterface
 
     public function get($id)
     {
-        $stmt = $this->connection->query("select * from comment where id ='$id'");
-        if (!$stmt) {
+        $stp = $this->connection->prepare('select * from comment where id =:id');
+        $stp->bindParam(':id', $id, PDO::PARAM_INT);
+        $stp->execute();
+        if (!$stp) {
             return [];
         }
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $row = $stp->fetch(PDO::FETCH_ASSOC);
         return $row;
     }
 
     public function getByParent($parentId)
     {
-        $stmt = $this->connection->query("select * from comment where parent ='$parentId' order by created desc");
+        $stp = $this->connection->prepare('select * from comment where parent =:id order by created desc');
+        $stp->bindParam(':id', $parentId, PDO::PARAM_INT);
+        $stp->execute();
 
-        if (!$stmt) {
+        if (!$stp) {
             return [];
         }
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $stp->fetchAll(PDO::FETCH_ASSOC);
         return $rows;
     }
 
     public function insert($text, $parentId)
     {
-        $this->connection->exec("insert into comment (text, parent) values ('$text', '$parentId')");
-        $insertedId = $this->connection->lastInsertId();
-        $this->connection->exec("update comment set has_child='1' where id='$parentId'");
-        return $insertedId;
+        try {
+            $this->connection->beginTransaction();
+            $stp = $this->connection->prepare("insert into comment (text, parent) values (:text, :id)");
+            $stp->bindParam(':text', $text, PDO::PARAM_STR);
+            $stp->bindParam(':id', $parentId, PDO::PARAM_INT);
+            $stp->execute();
+            if(!$stp) throw new Exception("Error inserting DB", 1);
+            $insertedId = $this->connection->lastInsertId();
+            $stp = $this->connection->prepare("update comment set has_child='1' where id=:id");
+            $stp->bindParam(':id', $parentId, PDO::PARAM_INT);
+            $stp->execute();
+            if(!$stp) throw new Exception("Error updating parent", 1);
+            $this->connection->commit();
+            return $insertedId;
+        } catch (Exception $e) {
+            $this->connection->rollBack();
+            // log exception
+            return 0;
+        }
     }
 
     public function delete($id)
     {
-        $stmt = $this->connection->exec("delete from comment where id ='$id'");
+        $stp = $this->connection->prepare("delete from comment where id =:id");
+        $stp->bindParam(':id', $id, PDO::PARAM_INT);
+        $stp->execute();
         return $stmt;
+    }
+
+    public function setNoChild($id)
+    {
+        $stp = $this->connection->prepare("update comment set has_child='0' where id =:id");
+        $stp->bindParam(':id', $id, PDO::PARAM_INT);
+        $stp->execute();
     }
 }

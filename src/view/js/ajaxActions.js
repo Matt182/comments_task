@@ -18,12 +18,14 @@ function postComment(parentId)
 function deleteComment(id)
 {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET','src/deleteComment.php?id=' + id, true);
+    var body = 'id=' + encodeURIComponent(id);
+    xhr.open('POST','src/deleteComment.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
     xhr.onreadystatechange=function()
     {
         if (xhr.readyState==4 && xhr.status==200) {
             document.getElementById("comment" + id).remove();
         }
     }
-    xhr.send()
+    xhr.send(body)
 }
