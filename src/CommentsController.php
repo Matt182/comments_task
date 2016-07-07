@@ -1,14 +1,18 @@
 <?php
 namespace comments;
 
+use comments\view\ViewInterface;
+
 class CommentsController
 {
     private $db;
+    private $view;
     private $commentsTree;
 
-    public function __construct(CommentsDbInterface $db)
+    public function __construct(CommentsDbInterface $db, ViewInterface $view)
     {
         $this->db = $db;
+        $this->view = $view;
         $commentsTree = array();
     }
 
@@ -22,7 +26,7 @@ class CommentsController
                 $comment->addChildren($this->getChildren($comment->getId()));
             }
         }
-        include 'comments.php';
+        $this->view->render('comments', ['commentsTree' => $this->commentsTree ? $this->commentsTree : []]);
     }
 
     public function getChildren($parentId)
