@@ -1,6 +1,6 @@
 {
     "name": "egorleb/comments",
-    "description": "comments implementation for hotels.ru",
+    "description": "comments implementation",
     "autoload": {
         "psr-4": {
             "comments\\": "src/"
