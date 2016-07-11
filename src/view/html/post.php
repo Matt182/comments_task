@@ -12,7 +12,7 @@ use function comments\printChildren;
             <p>
                 <?= $child->getText() ?>
             </p>
-            <?php if ($n <= 5): ?>
+            <?php if ($n < 5): ?>
                 <div class="row">
                     <form id="<?= $child->getId() ?>">
                         <div class="input-group">

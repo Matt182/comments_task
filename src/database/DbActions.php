@@ -36,19 +36,15 @@ class DbActions implements CommentsDbInterface
     }
 
     /**
-     * @param int $parentId @return array
+     * @param void @return array
      */
-    public function getByParent($parentId)
+    public function getAll()
     {
-        $stp = $this->connection->prepare('select * from comment where parent =:id order by created desc');
+        $stp = $this->connection->prepare('select * from comment order by created desc');
         $stp->bindParam(':id', $parentId, PDO::PARAM_INT);
         $stp->execute();
 
-        if (!$stp) {
-            return [];
-        }
-        $rows = $stp->fetchAll(PDO::FETCH_ASSOC);
-        return $rows;
+        return $row = $stp->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
@@ -58,16 +54,42 @@ class DbActions implements CommentsDbInterface
     {
         try {
             $this->connection->beginTransaction();
-            $stp = $this->connection->prepare("insert into comment (text, parent) values (:text, :id)");
-            $stp->bindParam(':text', $text, PDO::PARAM_STR);
-            $stp->bindParam(':id', $parentId, PDO::PARAM_INT);
+            if ($parentId == 0) {
+                $parentLeft = 0;
+            } else {
+                $stp = $this->connection->prepare('select * from comment where id =:id');
+                $stp->bindParam(':id', $parentId, PDO::PARAM_INT);
+                $stp->execute();
+                if(!$stp) throw new Exception("Error inserting into DB", 1);
+
+
+                $parentRow = $stp->fetch(PDO::FETCH_ASSOC);
+                $parentLeft = $parentRow['lft'];
+            }
+            $stp = $this->connection->prepare('update comment set rgt = rgt + 2 where rgt > :parentLeft');
+            $stp->bindParam(':parentLeft', $parentLeft, PDO::PARAM_INT);
             $stp->execute();
-            if(!$stp) throw new Exception("Error inserting DB", 1);
+            if(!$stp) throw new Exception("Error inserting into DB", 1);
+
+            $stp = $this->connection->prepare('update comment set lft = lft + 2 where lft > :parentLeft');
+            $stp->bindParam(':parentLeft', $parentLeft, PDO::PARAM_INT);
+            $stp->execute();
+            if(!$stp) throw new Exception("Error inserting into DB", 1);
+
+            $stp = $this->connection->prepare('insert into comment (text, parent, lft, rgt) values (:text, :parentId, :lft, :rgt)');
+            $stp->bindParam(':text', $text, PDO::PARAM_STR);
+            $stp->bindParam(':parentId', $parentId, PDO::PARAM_INT);
+            $stp->bindParam(':lft', ++$parentLeft, PDO::PARAM_INT);
+            $stp->bindParam(':rgt', ++$parentLeft, PDO::PARAM_INT);
+            $stp->execute();
+
+            if(!$stp) throw new Exception("Error inserting into DB", 1);
             $insertedId = $this->connection->lastInsertId();
             $stp = $this->connection->prepare("update comment set has_child='1' where id=:id");
             $stp->bindParam(':id', $parentId, PDO::PARAM_INT);
             $stp->execute();
-            if(!$stp) throw new Exception("Error updating parent", 1);
+
+            if(!$stp) throw new Exception("Error inserting into DB", 1);
             $this->connection->commit();
             return $insertedId;
         } catch (Exception $e) {
@@ -82,10 +104,42 @@ class DbActions implements CommentsDbInterface
      */
     public function delete($id)
     {
-        $stp = $this->connection->prepare("delete from comment where id =:id");
-        $stp->bindParam(':id', $id, PDO::PARAM_INT);
-        $stp->execute();
-        return $stmt;
+        try {
+            $this->connection->beginTransaction();
+            $stp = $this->connection->prepare("select * from comment where id =:id");
+            $stp->bindParam(':id', $id, PDO::PARAM_INT);
+            $stp->execute();
+            if(!$stp) throw new Exception("Error when deleting id: $id", 1);
+
+            $deleting = $stp->fetch(PDO::FETCH_ASSOC);
+            $deletingLeft = $deleting['lft'];
+            $deletingRight = $deleting['rgt'];
+            $width = $deletingRight - $deletingLeft + 1;
+
+            $stp = $this->connection->prepare("delete from comment where lft >= :lft and lft <= :rgt ");
+            $stp->bindParam(':lft', $deletingLeft, PDO::PARAM_INT);
+            $stp->bindParam(':rgt', $deletingRight, PDO::PARAM_INT);
+            $stp->execute();
+            if(!$stp) throw new Exception("Error when deleting id: $id", 1);
+
+            $stp = $this->connection->prepare("update comment set rgt = rgt - :width where rgt > :rgt ");
+            $stp->bindParam(':width', $width, PDO::PARAM_INT);
+            $stp->bindParam(':rgt', $deletingRight, PDO::PARAM_INT);
+            if(!$stp) throw new Exception("Error when deleting id: $id", 1);
+
+            $stp = $this->connection->prepare("update comment set lft = lft - :width where lft > :rgt ");
+            $stp->bindParam(':width', $width, PDO::PARAM_INT);
+            $stp->bindParam(':rgt', $deletingRight, PDO::PARAM_INT);
+            if(!$stp) throw new Exception("Error when deleting id: $id", 1);
+            $this->connection->commit();
+
+            return $stp;
+        } catch (Exception $e) {
+            //log Exception
+            $this->connection->rollBack();
+            return $stp;
+        }
+
     }
 
     /**

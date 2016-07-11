@@ -10,11 +10,14 @@ class CommentsController
     private $view;
     private $commentsTree;
 
+    /**
+     * @param CommentsDbInterface $db @param ViewInterface $view @return void
+     */
     public function __construct(CommentsDbInterface $db, ViewInterface $view)
     {
         $this->db = $db;
         $this->view = $view;
-        $commentsTree = array();
+        $commentsTree = [];
     }
 
     /**
@@ -22,31 +25,49 @@ class CommentsController
      */
     public function index()
     {
-        $comments = $this->db->getByParent(0);
-        foreach ($comments as $comment) {
-            $comment = new Comment($comment);
-            $this->commentsTree[] = $comment;
-            if($comment->hasChild()) {
-                $comment->addChildren($this->getChildren($comment->getId()));
-            }
-        }
+        $comments = $this->db->getAll();
+
+        $this->commentsTree = $this->buildTree($comments);
+
+        $this->commentsTree = $this->TreeToObjects($this->commentsTree);
+
+
         $this->view->render('comments', ['commentsTree' => $this->commentsTree ? $this->commentsTree : []]);
     }
 
     /**
-     * @param int $parentId @return array
+     * @param array $elements @param int $parentId @return array
      */
-    public function getChildren($parentId)
-    {
-        $children = [];
-        $comments = $this->db->getByParent($parentId);
-        foreach ($comments as $comment) {
-            $comment = new Comment($comment);
-            if($comment->hasChild()) {
-                $comment->addChildren($this->getChildren($comment->getId()));
+    function buildTree(array &$comments, $parentId = 0) {
+
+        $branch = [];
+
+        foreach ($comments as &$comment) {
+
+            if ($comment['parent'] == $parentId) {
+                $children = $this->buildTree($comments, $comment['id']);
+                if ($children) {
+                    $comment['children'] = $children;
+                }
+                $branch[$comment['id']] = $comment;
+                unset($comment);
             }
-            $children[] = $comment;
         }
-        return $children;
+        return $branch;
+    }
+
+    /**
+     * @param array $tree @return array
+     */
+    function TreeToObjects(array $tree)
+    {
+        $commentsObj = [];
+        foreach ($tree as $comment) {
+            $commentsObj[$comment['id']] = new Comment($comment);
+            if (isset($comment['children'])) {
+                $commentsObj[$comment['id']]->addChildren($this->TreeToObjects($comment['children']));
+            }
+        }
+        return $commentsObj;
     }
 }
