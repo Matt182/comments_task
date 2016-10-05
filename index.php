@@ -8,6 +8,10 @@ use comments\database\DbActions;
 use comments\view\View;
 
 throw new Exception("Error Processing Request", 1);
+throw new Exception("Error Processing Request", 1);
+throw new Exception("Error Processing Request", 1);
+throw new Exception("Error Processing Request", 1);
+throw new Exception("Error Processing Request", 1);
 
 
 $commentsController = new CommentsController(new DbActions(), new View());
